@@ -144,12 +144,7 @@ void EQMasterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
+    
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
@@ -181,6 +176,37 @@ void EQMasterAudioProcessor::setStateInformation (const void* data, int sizeInBy
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+
+}
+
+// writing function that we call from pluginprocessor.h
+juce::AudioProcessorValueTreeState::ParameterLayout EQMasterAudioProcessor::createParameterLayout() {
+    
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+    // add audio parameter floats; names, normalizable range and default value
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        "LowCut Freq", 
+        "LowCut Freq", 
+        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f), 
+        20.f)
+    );
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        "HighCut Freq",
+        "HighCut Freq",
+        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f),
+        20000.f)
+    );
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        "Peak Freq",
+        "Peak Freq",
+        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f),
+        750.f)
+    );
+
+    return layout;
 }
 
 //==============================================================================

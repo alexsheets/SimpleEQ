@@ -3,6 +3,13 @@
 
     This file contains the basic framework code for a JUCE plugin processor.
 
+    Audio plugins depend on parameters to control the various parts of DSP.
+    Juce coordinates the syncing of the parameters from GUI to DSP.
+
+    This is the file where we want to set up variables and helper functions
+    that act as the sort of backend for the project.
+
+
   ==============================================================================
 */
 
@@ -52,6 +59,15 @@ public:
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
+
+    // function to create apvts parameter layout
+    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+
+    // apvts: audio processor value tree state: data structure which stores and manages all parameters
+    // such as volume, filter, cutoff etc.
+    // acts as a 'central repository' for the current state of the project
+    // instantiation takes in: audio processor, undo manager (null), value tree identifier, and parameter layout
+    juce::AudioProcessorValueTreeState apvts { *this, nullptr, "Parameters", createParameterLayout() };
 
 private:
     //==============================================================================
