@@ -206,6 +206,45 @@ juce::AudioProcessorValueTreeState::ParameterLayout EQMasterAudioProcessor::crea
         750.f)
     );
 
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        "Peak Gain",
+        "Peak Gain",
+        juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f),
+        0.0f)
+    );
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        "Peak Quality",
+        "Peak Quality",
+        juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 1.f),
+        1.f)
+    );
+
+    juce::StringArray stringArr;
+    for (int i = 0; i < 4; ++i) {
+        juce::String str;
+        // create string which is multiple of twelve and describe it
+        str << (12 + i * 12);
+        str << " db/oct";
+        // then add to string array
+        stringArr.add(str);
+    }
+
+    // using choice object for slope instead of sliders
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        "LowCut Slope",
+        "LowCut Slope",
+        stringArr,
+        0)
+    );
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        "HighCut Slope",
+        "HighCut Slope",
+        stringArr,
+        0)
+    );
+
     return layout;
 }
 
