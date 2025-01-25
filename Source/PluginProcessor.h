@@ -70,6 +70,21 @@ public:
     juce::AudioProcessorValueTreeState apvts { *this, nullptr, "Parameters", createParameterLayout() };
 
 private:
+
+    // central concept of dsp in juce: define a chain and then pass in processing context
+    // which will run through each element of the chain automatically
+
+    // creating type aliases to eliminate namespace and template definitions
+
+
+    using Filter = juce::dsp::IIR::Filter<float>;
+    // could do this for highpass, lowpass, peak, shelf, etc.
+    using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
+    
+    // creating two instances to do stereo processing
+    using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter>;
+    MonoChain leftChain, rightChain;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EQMasterAudioProcessor)
 };

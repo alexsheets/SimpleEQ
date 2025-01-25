@@ -93,14 +93,22 @@ void EQMasterAudioProcessor::changeProgramName (int index, const juce::String& n
 //==============================================================================
 void EQMasterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    // pre playback init
+    // pass process spec object to chains which pass it to each link in the chain
+
+    juce::dsp::ProcessSpec spec;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.numChannels = 1;
+    spec.sampleRate = sampleRate;
+    // pass to each chain
+    leftChain.prepare(spec);
+    rightChain.prepare(spec);
+
 }
 
 void EQMasterAudioProcessor::releaseResources()
 {
-    // When playback stops, you can use this as an opportunity to free up any
-    // spare memory, etc.
+    // free up resources post playback
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -144,13 +152,18 @@ void EQMasterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        auto* channelData = buffer.getWritePointer (channel);
+    // setting up dsp
+    juce::dsp::AudioBlock<float> block(buffer);
+    auto leftBlock = block.getSingleChannelBlock(0);
+    auto rightBlock = block.getSingleChannelBlock(1);
 
-        // ..do something to the data...
-    }
+    // create processing context which wraps them
+    juce::dsp::ProcessContextReplacing<float> leftContext(leftBlock);
+    juce::dsp::ProcessContextReplacing<float> rightContext(rightBlock);
+
+    // pass contexts to monochains
+    leftChain.process(leftContext);
+    rightChain.process(rightContext);
 }
 
 //==============================================================================
@@ -161,7 +174,8 @@ bool EQMasterAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* EQMasterAudioProcessor::createEditor()
 {
-    return new EQMasterAudioProcessorEditor (*this);
+    // return new EQMasterAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
